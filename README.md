@@ -2,7 +2,7 @@
 # PROJECT NAME
 # Group information
 * Student 1. Samuel Palovaara, samuel.palovaara@student.oulu.fi
-* Student 2. Name and email
+* Student 2. Toni  Makkonen, Toni.Makkonen@student.oulu.fi
 * Student 3. Name and email
 * Student 4. Name and email
 
