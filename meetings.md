@@ -1,15 +1,15 @@
 # Meetings minutes
 
 ## Meeting 1.
-* **DATE:**
-* **PARTICIPANTS:**
-* **TEACHER:**
+* **DATE: 6.2.2026**
+* **PARTICIPANTS: Samuel Palovaara, Toni Makkonen**
+* **TEACHER: Mika Oja**
 
 ### Action points
-*List here the actions points discussed with assistants*
+More differentiation to why this is an API
 
 ### Notes
-*Add here notes that you consider important. This is not mandatory*
+Many resources, implement the neccessary ones first and if there is time, implement the rest. This means the leaderboard and other statistics.
 
 
 ## Meeting 2.
