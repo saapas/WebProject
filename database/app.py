@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 
@@ -8,7 +10,7 @@ db = SQLAlchemy(app)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    created_at = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     games = db.relationship(
         "Game",
@@ -60,5 +62,84 @@ class UserStats(db.Model):
 
     user = db.relationship("User", back_populates="stats")
 
-with app.app_context():
-    db.create_all()
+
+def init_db() -> None:
+    with app.app_context():
+        db.create_all()
+
+
+def create_user(created_at: datetime | None = None, commit: bool = True) -> User:
+    user = User(created_at=created_at or datetime.utcnow())
+    db.session.add(user)
+    if commit:
+        db.session.commit()
+    return user
+
+
+def create_game(
+    user: User,
+    mode: str,
+    attempts: int,
+    won: bool,
+    lost: bool,
+    commit: bool = True,
+) -> Game:
+    game = Game(user=user, mode=mode, attempts=attempts, won=won, lost=lost)
+    db.session.add(game)
+    if commit:
+        db.session.commit()
+    return game
+
+
+def create_guess(
+    game: Game,
+    guessed_word: str,
+    feedback: str,
+    commit: bool = True,
+) -> Guess:
+    guess = Guess(game=game, guessed_word=guessed_word, feedback=feedback)
+    db.session.add(guess)
+    if commit:
+        db.session.commit()
+    return guess
+
+
+def create_daily_word(
+    date: datetime,
+    word: str,
+    commit: bool = True,
+) -> DailyWord:
+    daily_word = DailyWord(date=date, word=word)
+    db.session.add(daily_word)
+    if commit:
+        db.session.commit()
+    return daily_word
+
+
+def create_user_stats(
+    user: User,
+    games_played: int,
+    games_won: int,
+    win_streak: int,
+    avg_guesses: float,
+    commit: bool = True,
+) -> UserStats:
+    stats = UserStats(
+        user=user,
+        games_played=games_played,
+        games_won=games_won,
+        win_streak=win_streak,
+        avg_guesses=avg_guesses,
+    )
+    db.session.add(stats)
+    if commit:
+        db.session.commit()
+    return stats
+
+
+def get_user(user_id: int) -> User | None:
+    return User.query.get(user_id)
+
+
+def list_user_games(user_id: int) -> list[Game]:
+    return Game.query.filter_by(user_id=user_id).all()
