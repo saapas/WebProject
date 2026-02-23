@@ -27,9 +27,9 @@ def seed_data() -> None:
         create_user_stats(user_1, 3, 2, 1, 4.3, commit=False)
         create_user_stats(user_2, 2, 1, 0, 5.0, commit=False)
 
-        game_1 = create_game(user_1, "daily", 4, True, False, commit=False)
-        game_2 = create_game(user_1, "daily", 6, False, True, commit=False)
-        game_3 = create_game(user_2, "daily", 5, True, False, commit=False)
+        game_1 = create_game(user_1, "daily", 4, True, commit=False)
+        game_2 = create_game(user_1, "daily", 6, False,  commit=False)
+        game_3 = create_game(user_2, "daily", 5, True, commit=False)
 
         create_guess(game_1, "crane", "BGBGB", commit=False)
         create_guess(game_1, "slate", "GGGGG", commit=False)

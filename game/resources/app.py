@@ -31,7 +31,6 @@ class Game(db.Model):
     mode = db.Column(db.String(5), nullable = False)
     attempts = db.Column(db.Integer, nullable = False)
     won = db.Column(db.Boolean, nullable = False)
-    lost = db.Column(db.Boolean, nullable = False)
 
     user = db.relationship("User", back_populates="games")
 
@@ -81,10 +80,9 @@ def create_game(
     mode: str,
     attempts: int,
     won: bool,
-    lost: bool,
     commit: bool = True,
 ) -> Game:
-    game = Game(user=user, mode=mode, attempts=attempts, won=won, lost=lost)
+    game = Game(user=user, mode=mode, attempts=attempts, won=won)
     db.session.add(game)
     if commit:
         db.session.commit()
