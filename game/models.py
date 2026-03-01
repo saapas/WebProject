@@ -1,10 +1,6 @@
 import click
-import hashlib
 from flask.cli import with_appcontext
 from datetime import datetime
-
-from flask import Flask, request
-from flask_sqlalchemy import SQLAlchemy
 
 from . import db
 
@@ -18,19 +14,13 @@ class User(db.Model):
         cascade="all, delete-orphan"
     )
 
-    stats = db.relationship(
-        "UserStats",
-        back_populates="user",
-        uselist=False,
-        cascade="all, delete-orphan"
-    )
-
 class Game(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    mode = db.Column(db.String(5), nullable = False)
-    attempts = db.Column(db.Integer, nullable = False)
-    won = db.Column(db.Boolean, nullable = False)
+    mode = db.Column(db.String(3), nullable = False)
+    attempts = db.Column(db.Integer, nullable = False, default=0)
+    won = db.Column(db.Boolean, nullable = False, default=False)
+    target_word = db.Column(db.String(5))
 
     user = db.relationship("User", back_populates="games")
 
@@ -40,6 +30,36 @@ class Game(db.Model):
         cascade="all, delete-orphan"
     )
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "mode": self.mode,
+            "attempts": self.attempts,
+            "won": self.won,
+        }
+
+    def deserialize(self, doc):
+        self.user_id = doc["user_id"]
+        self.mode = doc["mode"]
+
+    @staticmethod
+    def json_schema():
+        schema = {
+            "type": "object",
+            "required": ["user_id", "mode"]
+        }
+        props = schema["properties"] = {}
+        props["user_id"] = {
+            "description": "ID of the user",
+            "type": "integer"
+        }
+        props["mode"] = {
+            "description": "'day' or 'inf'",
+            "type": "string"
+        }
+        return schema
+
 class Guess(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     game_id = db.Column(db.Integer, db.ForeignKey("game.id"))
@@ -47,6 +67,30 @@ class Guess(db.Model):
     feedback = db.Column(db.String(100), nullable = False)
 
     game = db.relationship("Game", back_populates="guesses")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "game_id": self.game_id,
+            "guessed_word": self.guessed_word,
+            "feedback": self.feedback
+        }
+
+    def deserialize(self, doc):
+        self.guessed_word = doc["word"]
+
+    @staticmethod
+    def json_schema():
+        schema = {
+            "type": "object",
+            "required": ["guessed_word"]
+        }
+        props = schema["properties"] = {}
+        props["guessed_word"] = {
+            "description": "5 letter word guessed by the player",
+            "type": "string"
+        }
+        return schema
 
 class DailyWord(db.Model):
     date = db.Column(db.DateTime, primary_key=True)
