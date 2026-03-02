@@ -27,7 +27,7 @@ class GameCollection(Resource):
         except ValidationError as e:
             raise BadRequest(description=str(e))
 
-        user = User.query.get(request.json["user_id"])
+        user = db.session.get(User, request.json["user_id"])
         if not user:
             raise NotFound(description="User not found")
 
@@ -49,14 +49,18 @@ class GameCollection(Resource):
 class GameItem(Resource):
 
     def get(self, game_id):
-        game = Game.query.get_or_404(game_id)
+        game = db.session.get(Game, game_id)
+        if not game:
+            raise NotFound(description=f"Game {game_id} not found")
         return game.serialize()
 
     def put(self, game_id):
         if not request.json:
             raise UnsupportedMediaType
 
-        game = Game.query.get_or_404(game_id)
+        game = db.session.get(Game, game_id)
+        if not game:
+            raise NotFound(description=f"Game {game_id} not found")
 
         try:
             validate(request.json, Game.json_schema())
@@ -73,7 +77,9 @@ class GameItem(Resource):
         return Response(status=204)
 
     def delete(self, game_id):
-        game = Game.query.get_or_404(game_id)
+        game = db.session.get(Game, game_id)
+        if not game:
+            raise NotFound(description=f"Game {game_id} not found")
         db.session.delete(game)
         db.session.commit()
         return Response(status=204)

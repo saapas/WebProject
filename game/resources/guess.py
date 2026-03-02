@@ -13,7 +13,7 @@ class GuessCollection(Resource):
 
     def get(self, game_id):
         response_data = []
-        game = Game.query.get_or_404(game_id)
+        game = db.session.get(Game, game_id)
         for guess in game.guesses:
             response_data.append(guess.serialize())
         return response_data
@@ -22,7 +22,7 @@ class GuessCollection(Resource):
         if not request.json:
             raise UnsupportedMediaType
 
-        game = Game.query.get_or_404(game_id)
+        game = db.session.get(Game, game_id)
 
         try:
             validate(request.json, Guess.json_schema())
@@ -37,7 +37,7 @@ class GuessCollection(Resource):
             db.session.commit()
         except IntegrityError:
             raise BadRequest(description="Invalid guess")
+        except ValueError as e:
+            raise BadRequest(description=str(e))
 
-        return Response(status=201, headers={
-                "Location": url_for("api.guessitem", guess_id=guess.id)
-            })
+        return guess.serialize(), 201
