@@ -288,3 +288,146 @@ class TestGuessCollection:
         client.post(url, json={"guessed_word": "omena"})
         resp = client.post(url, json={"guessed_word": "kalja"})
         assert resp.status_code == 400
+
+class TestUserCollection:
+    RESOURCE_URL = "/api/users"
+
+    def test_get_users(self, client):
+        resp = client.get(self.RESOURCE_URL)
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        assert isinstance(body, list)
+        assert len(body) >= 3
+        for u in body:
+            assert "id" in u
+            assert "created_at" in u
+
+    def test_post_user_valid(self, client):
+        resp = client.post(self.RESOURCE_URL, json={})
+        assert resp.status_code == 201
+        assert "Location" in resp.headers
+        # Location should point to created user
+        loc = resp.headers["Location"]
+        assert "/api/users/" in loc or loc.endswith("/api/users") is False
+
+    def test_post_user_wrong_mediatype(self, client):
+        # No JSON => UnsupportedMediaType (415)
+        resp = client.post(self.RESOURCE_URL, data="{}")
+        assert resp.status_code == 415
+
+
+class TestUserItem:
+    def test_get_user(self, client):
+        user = db.session.query(User).first()
+        resp = client.get(f"/api/users/{user.id}")
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        assert body["id"] == user.id
+        assert "created_at" in body
+
+    def test_get_user_not_found(self, client):
+        resp = client.get("/api/users/999999")
+        assert resp.status_code == 404
+
+    def test_put_user_valid(self, client):
+        user = db.session.query(User).first()
+        resp = client.put(f"/api/users/{user.id}", json={})
+        assert resp.status_code == 204
+
+    def test_put_user_wrong_mediatype(self, client):
+        user = db.session.query(User).first()
+        resp = client.put(f"/api/users/{user.id}", data="{}")
+        assert resp.status_code == 415
+
+    def test_delete_user(self, client):
+        user = db.session.query(User).first()
+        resp = client.delete(f"/api/users/{user.id}")
+        assert resp.status_code == 204
+        resp2 = client.get(f"/api/users/{user.id}")
+        assert resp2.status_code == 404
+
+class TestDailyWordCollection:
+    RESOURCE_URL = "/api/dailywords"
+
+    def test_get_dailywords(self, client):
+        resp = client.get(self.RESOURCE_URL)
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        assert isinstance(body, list)
+        assert len(body) >= 5
+        for dw in body:
+            assert "date" in dw
+            assert "word" in dw
+
+    def test_post_dailyword_valid(self, client):
+        # create a new date not in seed (far future)
+        date_str = (datetime.datetime.now().date() + datetime.timedelta(days=30)).isoformat()
+        resp = client.post(self.RESOURCE_URL, json={"date": date_str, "word": "kissa"})
+        assert resp.status_code == 201
+        assert "Location" in resp.headers
+
+        # verify it can be fetched
+        resp2 = client.get(f"/api/dailywords/{date_str}")
+        assert resp2.status_code == 200
+        body2 = json.loads(resp2.data)
+        assert body2["date"] == date_str
+        assert body2["word"] == "kissa"
+
+    def test_post_dailyword_invalid_date(self, client):
+        resp = client.post(self.RESOURCE_URL, json={"date": "bad-date", "word": "kissa"})
+        assert resp.status_code == 400
+
+    def test_post_dailyword_wrong_mediatype(self, client):
+        resp = client.post(self.RESOURCE_URL, data='{"date":"2026-01-01","word":"kissa"}')
+        assert resp.status_code == 415
+
+
+class TestDailyWordItem:
+    def test_get_dailyword(self, client):
+        date_str = datetime.datetime.now().date().isoformat()
+        resp = client.get(f"/api/dailywords/{date_str}")
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        assert body["date"] == date_str
+        assert "word" in body
+        assert len(body["word"]) == 5
+
+    def test_get_dailyword_bad_date(self, client):
+        resp = client.get("/api/dailywords/not-a-date")
+        assert resp.status_code == 400
+
+    def test_get_dailyword_not_found(self, client):
+        resp = client.get("/api/dailywords/2099-01-01")
+        assert resp.status_code == 404
+
+    def test_put_dailyword_valid(self, client):
+        date_str = datetime.datetime.now().date().isoformat()
+        resp = client.put(f"/api/dailywords/{date_str}", json={"date": date_str, "word": "kissa"})
+        assert resp.status_code == 204
+
+        # verify updated
+        resp2 = client.get(f"/api/dailywords/{date_str}")
+        assert resp2.status_code == 200
+        body2 = json.loads(resp2.data)
+        assert body2["word"] == "kissa"
+
+    def test_put_dailyword_body_date_mismatch(self, client):
+        date_str = datetime.datetime.now().date().isoformat()
+        resp = client.put(f"/api/dailywords/{date_str}", json={"date": "2020-01-01", "word": "kissa"})
+        assert resp.status_code == 400
+
+    def test_put_dailyword_wrong_mediatype(self, client):
+        date_str = datetime.datetime.now().date().isoformat()
+        resp = client.put(f"/api/dailywords/{date_str}", data='{"date":"2026-01-01","word":"kissa"}')
+        assert resp.status_code == 415
+
+    def test_delete_dailyword(self, client):
+        date_str = datetime.datetime.now().date().isoformat()
+        resp = client.delete(f"/api/dailywords/{date_str}")
+        assert resp.status_code == 204
+        resp2 = client.get(f"/api/dailywords/{date_str}")
+        assert resp2.status_code == 404
+
+    def test_delete_dailyword_bad_date(self, client):
+        resp = client.delete("/api/dailywords/not-a-date")
+        assert resp.status_code == 400
