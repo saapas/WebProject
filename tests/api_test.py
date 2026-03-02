@@ -12,6 +12,7 @@ from game.models import User, Game, Guess, DailyWord
 TEST_KEY = "verysafetestkey"
 
 """Most of the tests were taken from the course GitHub and slightly modified to fit our purposes"""
+"""https://github.com/UniOulu-Ubicomp-Programming-Courses/pwp-sensorhub-example/tree/ex2-project-layout/tests"""
 
 @pytest.fixture
 def client():
@@ -309,12 +310,11 @@ class TestUserCollection:
         resp = client.post(self.RESOURCE_URL, json={"username": "petri"})
         assert resp.status_code == 201
         assert "Location" in resp.headers
-        # Location should point to created user
+
         loc = resp.headers["Location"]
         assert "/api/users/" in loc or loc.endswith("/api/users") is False
 
     def test_post_user_wrong_mediatype(self, client):
-        # No JSON => UnsupportedMediaType (415)
         resp = client.post(self.RESOURCE_URL, data="{}")
         assert resp.status_code == 415
 
@@ -375,13 +375,11 @@ class TestDailyWordCollection:
             assert "word" in dw
 
     def test_post_dailyword_valid(self, client):
-        # create a new date not in seed (far future)
         date_str = (datetime.datetime.now().date() + datetime.timedelta(days=30)).isoformat()
         resp = client.post(self.RESOURCE_URL, json={"date": date_str, "word": "kissa"})
         assert resp.status_code == 201
         assert "Location" in resp.headers
 
-        # verify it can be fetched
         resp2 = client.get(f"/api/dailywords/{date_str}")
         assert resp2.status_code == 200
         body2 = json.loads(resp2.data)
@@ -420,7 +418,6 @@ class TestDailyWordItem:
         resp = client.put(f"/api/dailywords/{date_str}", json={"date": date_str, "word": "kissa"})
         assert resp.status_code == 204
 
-        # verify updated
         resp2 = client.get(f"/api/dailywords/{date_str}")
         assert resp2.status_code == 200
         body2 = json.loads(resp2.data)

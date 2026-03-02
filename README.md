@@ -1,36 +1,80 @@
-# PWP SPRING 2026
-# PROJECT NAME
-# Group information
-* Student 1. Samuel Palovaara, samuel.palovaara@student.oulu.fi
-* Student 2. Toni  Makkonen, Toni.Makkonen@student.oulu.fi
-* Student 3. Eeli Tavaststjerna eeli.tavaststjerna@student.oulu.fi
+# Wordle Game API
 
-__Remember to include all required documentation and HOWTOs, including how to create and populate the database, how to run and test the API, the url to the entrypoint, instructions on how to setup and run the client, instructions on how to setup and run the axiliary service and instructions on how to deploy the api in a production environment__
+This project is a Flask + Flask-RESTful API for a Wordle-style game.
 
-## Dependencies
+## Group information
+- Samuel Palovaara, samuel.palovaara@student.oulu.fi
+- Toni Makkonen, Toni.Makkonen@student.oulu.fi
+- Eeli Tavaststjerna, eeli.tavaststjerna@student.oulu.fi
+
+## Tech stack
 - Python 3.11+
+- Flask
+- Flask-SQLAlchemy
+- Flask-RESTful
 - SQLite 3
-- requirements.txt
 
-## Database
-- SQLite 3
+## Install (project root)
+1. Install package and runtime dependencies:
 
-### Generate the populated database using the script
-1. Install dependencies:
-	```bash
-	pip install -r requirements.txt
-	```
-2. Run the seed script from the project root:
-	```bash
-	python database/seed_db.py
-	```
+```bash
+pip install .
+```
 
-## ORM Models and Functions
-The ORM models and helper functions are defined in [database/app.py](database/app.py). This includes:
-- Models: User, Game, Guess, DailyWord, UserStats
-- Helper functions: init_db(), create_user(), create_game() etc.
+2. Install dependecies:
 
-## Scripts Used to Generate the Database
-- Seed script: [database/seed_db.py](database/seed_db.py)
+```bash
+pip install -r requirements.txt
+```
 
+## Run the API (development)
+From the project root:
 
+```bash
+flask --app game:create_app run --debug
+```
+
+Default URL:
+- API entrypoint: `http://127.0.0.1:5000/api/`
+
+## Database setup and population
+This API uses SQLite at `instance/wordlegame.db` by default.
+
+### Create tables
+From the project root:
+
+```bash
+flask --app game:create_app init-db
+```
+
+### Populate daily words (required for `mode="day"` game creation)
+You can add daily words via API:
+
+PowerShell (Windows):
+
+```bash
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:5000/api/dailywords" -ContentType "application/json" -Body '{"date":"2026-03-02","word":"crane"}'
+```
+
+## Run tests
+From the project root:
+
+```bash
+pytest -q
+```
+
+## Run coverage
+From the project root:
+
+```bash
+pytest tests/db_test.py --cov=game.models --cov-report=term-missing
+```
+
+```bash
+pytest --cov=game --cov-report=term-missing
+```
+
+## Notes
+- Packaging is configured through `pyproject.toml` and `MANIFEST.in`.
+- This repository currently contains the API service only.
+- Client and auxiliary services are not included in this codebase.

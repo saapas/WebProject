@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wordle-game-api"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "flask",
+    "flask-sqlalchemy",
+    "flask-restful",
+    "jsonschema",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["game*"]

@@ -11,6 +11,7 @@ from game import create_app, db
 from game.models import DailyWord, Game, Guess, User
 
 """Most of the tests were taken from the course GitHub and slightly modified to fit our purposes"""
+"""https://github.com/UniOulu-Ubicomp-Programming-Courses/pwp-sensorhub-example/tree/ex2-project-layout/tests"""
 
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):

@@ -16,10 +16,11 @@ api = Api(api_bp)
 api_bp.add_url_rule("/", "entry", views.entry)
 
 """Resource format was heavily isnpired by the course GitHub"""
+"""https://github.com/UniOulu-Ubicomp-Programming-Courses/pwp-sensorhub-example/tree/ex2-project-layout/sensorhub/resources"""
 api.add_resource(GameCollection, "/games")
 api.add_resource(GameItem, "/games/<int:game_id>")
 api.add_resource(GuessCollection, "/games/<int:game_id>/guesses")
-api.add_resource(UserCollection, "/users", endpoint="usercollection")
-api.add_resource(UserItem, "/users/<int:user_id>", endpoint="useritem")
-api.add_resource(DailyWordCollection, "/dailywords", endpoint="dailywordcollection")
-api.add_resource(DailyWordItem, "/dailywords/<string:date>", endpoint="dailyworditem")
+api.add_resource(UserCollection, "/users")
+api.add_resource(UserItem, "/users/<int:user_id>")
+api.add_resource(DailyWordCollection, "/dailywords")
+api.add_resource(DailyWordItem, "/dailywords/<string:date>")
