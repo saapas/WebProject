@@ -13,15 +13,15 @@ Many resources, implement the neccessary ones first and if there is time, implem
 
 
 ## Meeting 2.
-* **DATE:**
-* **PARTICIPANTS:**
-* **TEACHER:**
+* **DATE: 18.2.2026**
+* **PARTICIPANTS: Samuel Palovaara, Toni Makkonen, Eeli Tavaststjerna**
+* **TEACHER: Iván Sánchez**
 
 ### Action points
-*List here the actions points discussed with assistants*
+Clarify the content of the models (what each model/table represents) and some of the fields, consider some limitations to some of the properties (for instance attempts >0), consider if necessary removing the userstats table. Defines oncascade in foreign key. 
 
 ### Notes
-*Add here notes that you consider important. This is not mandatory*
+Adding gitignore and no UserStats
 
 
 ## Meeting 3.
