@@ -21,7 +21,7 @@ class GameCollection(Resource):
 
     def post(self):
         if not request.json:
-            raise UnsupportedMediaType
+            raise UnsupportedMediaType(description="Must be type json")
 
         try:
             validate(request.json, Game.json_schema())
@@ -52,6 +52,7 @@ class GameCollection(Resource):
         except IntegrityError:
             raise BadRequest(description="Invalid game data")
 
+
         return Response(status=201, headers={
                 "Location": url_for("api.gameitem", game_id=game.id)
             })
@@ -62,7 +63,7 @@ class GameItem(Resource):
     def get(self, game_id):
         game = db.session.get(Game, game_id)
         if not game:
-            raise NotFound(description=f"Game {game_id} not found")
+            raise NotFound(description=f"Game not found")
         return game.serialize()
 
     def put(self, game_id):
@@ -71,7 +72,7 @@ class GameItem(Resource):
 
         game = db.session.get(Game, game_id)
         if not game:
-            raise NotFound(description=f"Game {game_id} not found")
+            raise NotFound(description=f"Game not found")
 
         try:
             validate(request.json, Game.json_schema())
