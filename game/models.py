@@ -1,6 +1,6 @@
 import click
 from flask.cli import with_appcontext
-from datetime import datetime
+from datetime import datetime, time
 
 from . import db
 
@@ -13,6 +13,24 @@ class User(db.Model):
         back_populates="user",
         cascade="all, delete-orphan"
     )
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "created_at": self.created_at.isoformat() if self.created_at else None
+        }
+
+    def deserialize(self, doc):
+        return self
+
+    @staticmethod
+    def json_schema():
+        return {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": False
+        }
+
 
 class Game(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -64,7 +82,7 @@ class Guess(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     game_id = db.Column(db.Integer, db.ForeignKey("game.id"))
     guessed_word = db.Column(db.String(5), nullable = False)
-    feedback = db.Column(db.String(100), nullable = False)
+    feedback = db.Column(db.String(5), nullable = False)
 
     game = db.relationship("Game", back_populates="guesses")
 
@@ -95,6 +113,30 @@ class Guess(db.Model):
 class DailyWord(db.Model):
     date = db.Column(db.DateTime, primary_key=True)
     word = db.Column(db.String(5), nullable = False)
+
+    def serialize(self):
+        return {
+            "date": self.date.date().isoformat() if self.date else None,
+            "word": self.word
+        }
+
+    def deserialize(self, doc):
+        # doc["date"] muodossa "YYYY-MM-DD"
+        d = datetime.strptime(doc["date"], "%Y-%m-%d").date()
+        self.date = datetime.combine(d, time.min)
+        self.word = doc["word"]
+
+    @staticmethod
+    def json_schema():
+        return {
+            "type": "object",
+            "required": ["date", "word"],
+            "properties": {
+                "date": {"type": "string", "pattern": r"^\d{4}-\d{2}-\d{2}$"},
+                "word": {"type": "string", "minLength": 5, "maxLength": 5}
+            },
+            "additionalProperties": False
+        }
 
 @click.command("init-db")
 @with_appcontext

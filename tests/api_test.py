@@ -1,7 +1,6 @@
 import datetime
 import json
 import os
-import random
 import tempfile
 from flask.testing import FlaskClient
 import pytest
@@ -9,13 +8,13 @@ from werkzeug.datastructures import Headers
 
 from game import create_app, db
 from game.models import User, Game, Guess, DailyWord
-from game.game_logic import get_word
 
 TEST_KEY = "verysafetestkey"
 
 @pytest.fixture
 def client():
     db_fd, db_fname = tempfile.mkstemp()
+    os.close(db_fd)
     config = {
         "SQLALCHEMY_DATABASE_URI": "sqlite:///" + db_fname,
         "TESTING": True,
@@ -31,22 +30,39 @@ def client():
 
     yield app.test_client()
 
+    db.session.rollback()
     db.session.remove()
     db.drop_all()
+    db.engine.dispose()
     ctx.pop()
+    os.unlink(db_fname)
 
 def _populate_db():
+    
+    base_date = datetime.datetime.now().date()
+    daily_words_list = ["omena", "bread", "crane", "drink", "eagle"]
+    for i, word in enumerate(daily_words_list):
+        dw = DailyWord(date=datetime.datetime.combine(base_date + datetime.timedelta(days=i), datetime.datetime.min.time()), word=word)
+        db.session.add(dw)
+
+    db.session.commit()
+
+    users = []
     for _ in range(3):
         user = User()
         db.session.add(user)
+        users.append(user)
 
+        # daily mode game
         daily_game = Game(mode="day")
-        daily_game.target_word = get_word(daily_game)
+        # pick today's word
+        today_dw = DailyWord.query.filter_by(date=datetime.datetime.combine(base_date, datetime.datetime.min.time())).first()
+        daily_game.target_word = today_dw.word
         user.games.append(daily_game)
 
-        for _ in range(2):
+        for i in range(2):
             inf_game = Game(mode="inf")
-            inf_game.target_word = get_word(inf_game)
+            inf_game.target_word = daily_words_list[i +1]
             user.games.append(inf_game)
 
     db.session.commit()

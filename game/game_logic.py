@@ -1,26 +1,6 @@
-from datetime import datetime
 from game.models import Guess
 
 MAX_ATTEMPTS = 6
-
-def get_word(game):
-    if game.mode == "day":
-        today = datetime.now().date()
-        word = "omena" # lisää kun eelin koodi valmis
-
-        if not word:
-            raise ValueError("No daily word")
-        
-        return word
-    
-    elif game.mode == "inf":
-        word = "astia" # lisää kun eelin koodi valmis
-
-        if not word:
-            raise ValueError("No daily word")
-        
-        return word
-
 
 def evaluate_guess(guess_word, target_word):
     feedback = []
