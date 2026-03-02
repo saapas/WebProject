@@ -44,7 +44,7 @@ def db_handle():
 
 
 def _get_user(created_at=None):
-	return User(created_at=created_at or datetime(2026, 3, 1, 12, 0, 0))
+	return User(created_at=created_at or datetime(2026, 3, 1, 12, 0, 0), username="reika")
 
 
 def _get_game(mode="daily", attempts=4, won=True):
@@ -136,6 +136,16 @@ def test_game_columns_not_nullable(db_handle):
 
 	db_handle.session.rollback()
 
+def test_user_columns_not_nullable(db_handle):
+	"""User required columns reject null values."""
+	user = _get_user()
+	user.username = None
+	db_handle.session.add(user)
+	with pytest.raises(IntegrityError):
+		db_handle.session.commit()
+
+	db_handle.session.rollback()
+
 def test_guess_columns_not_nullable(db_handle):
 	"""Guess required columns reject null values."""
 	guess = _get_guess()
@@ -194,19 +204,20 @@ def test_daily_word_datetime_type_validation(db_handle):
 
 def test_user_serialize_deserialize_and_schema():
 	"""User helper methods are exercised for coverage and behavior."""
-	user = User(created_at=datetime(2026, 3, 2, 9, 30, 0))
+	user = User(created_at=datetime(2026, 3, 2, 9, 30, 0), username="pena")
 
 	serialized = user.serialize()
 	assert serialized["id"] is None
 	assert serialized["created_at"] == "2026-03-02T09:30:00"
+	assert serialized["username"] == "pena"
 
-	returned = user.deserialize({"ignored": True})
-	assert returned is user
+	user.deserialize({"username": "pekka"})
+	assert user.username == "pekka"
 
 	schema = User.json_schema()
 	assert schema["type"] == "object"
-	assert schema["properties"] == {}
-	assert schema["additionalProperties"] is False
+	assert schema["required"] == ["username"]
+	assert schema["properties"]["username"]["type"] == "string"
 
 
 def test_game_serialize_deserialize_and_schema():

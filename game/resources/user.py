@@ -2,7 +2,7 @@ from flask import Response, request, url_for
 from flask_restful import Resource
 from jsonschema import ValidationError, validate
 from sqlalchemy.exc import IntegrityError
-from werkzeug.exceptions import BadRequest, UnsupportedMediaType
+from werkzeug.exceptions import BadRequest, NotFound, UnsupportedMediaType
 
 from game import db
 from game.models import User
@@ -18,9 +18,6 @@ class UserCollection(Resource):
         return response_data
 
     def post(self):
-        if not request.json:
-            raise UnsupportedMediaType
-
         try:
             validate(request.json, User.json_schema())
         except ValidationError as e:
@@ -44,13 +41,14 @@ class UserItem(Resource):
 
     def get(self, user_id):
         user = db.session.get(User, user_id)
+        if not user:
+            raise NotFound(description=f"User not found")
         return user.serialize()
 
     def put(self, user_id):
-        if not request.json:
-            raise UnsupportedMediaType
-
         user = db.session.get(User, user_id)
+        if not user:
+            raise NotFound(description="User not found")
 
         try:
             validate(request.json, User.json_schema())
@@ -67,7 +65,7 @@ class UserItem(Resource):
         return Response(status=204)
 
     def delete(self, user_id):
-        user = User.query.get_or_404(user_id)
+        user = db.session.get(User, user_id)
         db.session.delete(user)
         db.session.commit()
         return Response(status=204)

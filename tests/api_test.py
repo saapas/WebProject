@@ -48,8 +48,9 @@ def _populate_db():
     db.session.commit()
 
     users = []
-    for _ in range(3):
-        user = User()
+    names = ["aasi", "apina", "orava"]
+    for i in range(3):
+        user = User(username=names[i- 1])
         db.session.add(user)
         users.append(user)
 
@@ -303,7 +304,7 @@ class TestUserCollection:
             assert "created_at" in u
 
     def test_post_user_valid(self, client):
-        resp = client.post(self.RESOURCE_URL, json={})
+        resp = client.post(self.RESOURCE_URL, json={"username": "petri"})
         assert resp.status_code == 201
         assert "Location" in resp.headers
         # Location should point to created user
@@ -315,6 +316,9 @@ class TestUserCollection:
         resp = client.post(self.RESOURCE_URL, data="{}")
         assert resp.status_code == 415
 
+    def test_post_missing_field(self, client):
+        resp = client.post(self.RESOURCE_URL, json={})
+        assert resp.status_code == 400
 
 class TestUserItem:
     def test_get_user(self, client):
@@ -331,7 +335,7 @@ class TestUserItem:
 
     def test_put_user_valid(self, client):
         user = db.session.query(User).first()
-        resp = client.put(f"/api/users/{user.id}", json={})
+        resp = client.put(f"/api/users/{user.id}", json={"username": "petro"})
         assert resp.status_code == 204
 
     def test_put_user_wrong_mediatype(self, client):
@@ -339,12 +343,21 @@ class TestUserItem:
         resp = client.put(f"/api/users/{user.id}", data="{}")
         assert resp.status_code == 415
 
+    def test_put_user_conflict(self, client):
+        resp = client.put(f"/api/users/{9999999}")
+        assert resp.status_code == 404
+
     def test_delete_user(self, client):
         user = db.session.query(User).first()
         resp = client.delete(f"/api/users/{user.id}")
         assert resp.status_code == 204
         resp2 = client.get(f"/api/users/{user.id}")
         assert resp2.status_code == 404
+
+    def test_put_missing_field(self, client):
+        user = db.session.query(User).first()
+        resp = client.put(f"/api/users/{user.id}", json="{}")
+        assert resp.status_code == 400
 
 class TestDailyWordCollection:
     RESOURCE_URL = "/api/dailywords"
@@ -420,6 +433,11 @@ class TestDailyWordItem:
         date_str = datetime.datetime.now().date().isoformat()
         resp = client.put(f"/api/dailywords/{date_str}", data='{"date":"2026-01-01","word":"kissa"}')
         assert resp.status_code == 415
+    
+    def test_put__dailyword_missing_field(self, client):
+        date_str = datetime.datetime.now().date().isoformat()
+        resp = client.put(f"/api/dailywords/{date_str}", json='{}')
+        assert resp.status_code == 400
 
     def test_delete_dailyword(self, client):
         date_str = datetime.datetime.now().date().isoformat()
@@ -431,3 +449,4 @@ class TestDailyWordItem:
     def test_delete_dailyword_bad_date(self, client):
         resp = client.delete("/api/dailywords/not-a-date")
         assert resp.status_code == 400
+    

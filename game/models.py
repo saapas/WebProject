@@ -11,6 +11,7 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    username = db.Column(db.String(10), nullable=False)
 
     games = db.relationship(
         "Game",
@@ -22,21 +23,27 @@ class User(db.Model):
         """Serialize user data to an API response dictionary."""
         return {
             "id": self.id,
-            "created_at": self.created_at.isoformat() if self.created_at else None
+            "created_at": self.created_at.isoformat(),
+            "username": self.username
         }
 
-    def deserialize(self, _doc):
+    def deserialize(self, doc):
         """Deserialize payload into the user model."""
-        return self
+        self.username = doc["username"]
 
     @staticmethod
     def json_schema():
-        """Return JSON schema for validating user payloads."""
-        return {
+        """Return JSON schema for validating guess payloads."""
+        schema = {
             "type": "object",
-            "properties": {},
-            "additionalProperties": False
+            "required": ["username"]
         }
+        props = schema["properties"] = {}
+        props["username"] = {
+            "description": "username when user was created",
+            "type": "string"
+        }
+        return schema
 
 
 class Game(db.Model):

@@ -2,7 +2,7 @@ from flask import Response, request, url_for
 from flask_restful import Resource
 from jsonschema import ValidationError, validate
 from sqlalchemy.exc import IntegrityError
-from werkzeug.exceptions import BadRequest, UnsupportedMediaType
+from werkzeug.exceptions import BadRequest, NotFound, UnsupportedMediaType
 
 from game import db
 from game.models import DailyWord
@@ -24,19 +24,14 @@ class DailyWordCollection(Resource):
         return response_data
 
     def post(self):
-        if not request.json:
-            raise UnsupportedMediaType
-
         try:
             validate(request.json, DailyWord.json_schema())
         except ValidationError as e:
             raise BadRequest(description=str(e))
 
         dw = DailyWord()
-        try:
-            dw.deserialize(request.json)
-        except ValueError:
-            raise BadRequest(description="Invalid date")
+
+        dw.deserialize(request.json)
 
         try:
             db.session.add(dw)
@@ -58,12 +53,12 @@ class DailyWordItem(Resource):
             raise BadRequest(description="Invalid date")
 
         dw = db.session.get(DailyWord, dt)
+        if not dw:
+            raise NotFound(description="DailyWord not found")
+            
         return dw.serialize()
 
     def put(self, date):
-        if not request.json:
-            raise UnsupportedMediaType
-
         try:
             dt = parse_date(date)
         except ValueError:
@@ -79,10 +74,8 @@ class DailyWordItem(Resource):
         if request.json.get("date") != date:
             raise BadRequest(description="date in body must match URL")
 
-        try:
-            dw.deserialize(request.json)
-        except ValueError:
-            raise BadRequest(description="Invalid date")
+
+        dw.deserialize(request.json)
 
         try:
             db.session.commit()
@@ -97,7 +90,7 @@ class DailyWordItem(Resource):
         except ValueError:
             raise BadRequest(description="Invalid date")
 
-        dw = DailyWord.query.get_or_404(dt)
+        dw = db.session.get(DailyWord, dt)
         db.session.delete(dw)
         db.session.commit()
         return Response(status=204)

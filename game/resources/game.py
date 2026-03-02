@@ -20,9 +20,6 @@ class GameCollection(Resource):
         return response_data
 
     def post(self):
-        if not request.json:
-            raise UnsupportedMediaType(description="Must be type json")
-
         try:
             validate(request.json, Game.json_schema())
         except ValidationError as e:
@@ -67,9 +64,6 @@ class GameItem(Resource):
         return game.serialize()
 
     def put(self, game_id):
-        if not request.json:
-            raise UnsupportedMediaType
-
         game = db.session.get(Game, game_id)
         if not game:
             raise NotFound(description=f"Game not found")
