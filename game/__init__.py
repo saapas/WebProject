@@ -1,3 +1,5 @@
+"""Flask application factory and shared SQLAlchemy instance."""
+
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -5,6 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 def create_app(test_config=None):
+    """Create and configure the Flask application instance."""
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SQLALCHEMY_DATABASE_URI="sqlite:///" + os.path.join(app.instance_path, "wordlegame.db"),
@@ -30,4 +33,3 @@ def create_app(test_config=None):
     app.register_blueprint(api.api_bp)
 
     return app
-

@@ -1,3 +1,5 @@
+"""API blueprint and resource route registration."""
+
 from flask import Blueprint
 from flask_restful import Api
 from game.resources.game import GameCollection, GameItem

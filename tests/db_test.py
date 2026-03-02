@@ -1,15 +1,12 @@
 import os
 import tempfile
 from datetime import datetime
-from pathlib import Path
-import sys
 
 import pytest
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import IntegrityError, StatementError
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from game import create_app, db
 from game.models import DailyWord, Game, Guess, User
 
@@ -193,3 +190,84 @@ def test_daily_word_datetime_type_validation(db_handle):
 
 	with pytest.raises(StatementError):
 		db_handle.session.commit()
+
+
+def test_user_serialize_deserialize_and_schema():
+	"""User helper methods are exercised for coverage and behavior."""
+	user = User(created_at=datetime(2026, 3, 2, 9, 30, 0))
+
+	serialized = user.serialize()
+	assert serialized["id"] is None
+	assert serialized["created_at"] == "2026-03-02T09:30:00"
+
+	returned = user.deserialize({"ignored": True})
+	assert returned is user
+
+	schema = User.json_schema()
+	assert schema["type"] == "object"
+	assert schema["properties"] == {}
+	assert schema["additionalProperties"] is False
+
+
+def test_game_serialize_deserialize_and_schema():
+	"""Game helper methods are exercised for coverage and behavior."""
+	game = Game(user_id=5, mode="inf", attempts=2, won=True)
+
+	serialized = game.serialize()
+	assert serialized == {
+		"id": None,
+		"user_id": 5,
+		"mode": "inf",
+		"attempts": 2,
+		"won": True,
+	}
+
+	game.deserialize({"user_id": 8, "mode": "day"})
+	assert game.user_id == 8
+	assert game.mode == "day"
+
+	schema = Game.json_schema()
+	assert schema["type"] == "object"
+	assert schema["required"] == ["user_id", "mode"]
+	assert schema["properties"]["user_id"]["type"] == "integer"
+	assert schema["properties"]["mode"]["type"] == "string"
+
+
+def test_guess_serialize_deserialize_and_schema():
+	"""Guess helper methods are exercised for coverage and behavior."""
+	guess = Guess(game_id=3, guessed_word="crane", feedback="BGBGB")
+
+	serialized = guess.serialize()
+	assert serialized == {
+		"id": None,
+		"game_id": 3,
+		"guessed_word": "crane",
+		"feedback": "BGBGB",
+	}
+
+	guess.deserialize({"word": "omena"})
+	assert guess.guessed_word == "omena"
+
+	schema = Guess.json_schema()
+	assert schema["type"] == "object"
+	assert schema["required"] == ["guessed_word"]
+	assert schema["properties"]["guessed_word"]["type"] == "string"
+
+
+def test_dailyword_serialize_deserialize_and_schema():
+	"""DailyWord helper methods are exercised for coverage and behavior."""
+	daily_word = DailyWord(date=datetime(2026, 3, 2, 0, 0, 0), word="slate")
+
+	serialized = daily_word.serialize()
+	assert serialized == {"date": "2026-03-02", "word": "slate"}
+
+	daily_word.deserialize({"date": "2026-03-05", "word": "crane"})
+	assert daily_word.date == datetime(2026, 3, 5, 0, 0, 0)
+	assert daily_word.word == "crane"
+
+	schema = DailyWord.json_schema()
+	assert schema["type"] == "object"
+	assert schema["required"] == ["date", "word"]
+	assert schema["properties"]["date"]["type"] == "string"
+	assert schema["properties"]["word"]["type"] == "string"
+	assert schema["additionalProperties"] is False
