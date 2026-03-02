@@ -11,6 +11,8 @@ from game.models import User, Game, Guess, DailyWord
 
 TEST_KEY = "verysafetestkey"
 
+"""Most of the tests were taken from the course GitHub and slightly modified to fit our purposes"""
+
 @pytest.fixture
 def client():
     db_fd, db_fname = tempfile.mkstemp()

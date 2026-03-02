@@ -15,6 +15,7 @@ api = Api(api_bp)
 
 api_bp.add_url_rule("/", "entry", views.entry)
 
+"""Resource format was heavily isnpired by the course GitHub"""
 api.add_resource(GameCollection, "/games")
 api.add_resource(GameItem, "/games/<int:game_id>")
 api.add_resource(GuessCollection, "/games/<int:game_id>/guesses")
