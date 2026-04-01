@@ -2,10 +2,10 @@
 
 from flask import Blueprint
 from flask_restful import Api
-from wordleGame.resources.game import GameCollection, GameItem
-from wordleGame.resources.guess import GuessCollection
-from wordleGame.resources.user import UserCollection, UserItem
-from wordleGame.resources.dailyword import DailyWordCollection, DailyWordItem
+from wordlegame.resources.game import GameCollection, GameItem
+from wordlegame.resources.guess import GuessCollection
+from wordlegame.resources.user import UserCollection, UserItem
+from wordlegame.resources.dailyword import DailyWordCollection, DailyWordItem
 
 
 from . import views

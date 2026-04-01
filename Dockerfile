@@ -4,7 +4,7 @@ ENV HOME=/tmp
 
 RUN pip install supervisor gunicorn
 
-WORKDIR /opt/wordleGame
+WORKDIR /opt/wordlegame
 
 COPY . .
 RUN pip install --no-cache-dir .

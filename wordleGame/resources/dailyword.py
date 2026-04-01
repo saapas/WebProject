@@ -4,8 +4,8 @@ from jsonschema import ValidationError, validate
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import BadRequest, NotFound, UnsupportedMediaType
 
-from wordleGame import db
-from wordleGame.models import DailyWord
+from wordlegame import db
+from wordlegame.models import DailyWord
 from datetime import datetime, time
 
 

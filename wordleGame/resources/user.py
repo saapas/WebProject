@@ -4,8 +4,8 @@ from jsonschema import ValidationError, validate
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import BadRequest, NotFound, UnsupportedMediaType
 
-from wordleGame import db
-from wordleGame.models import User
+from wordlegame import db
+from wordlegame.models import User
 
 
 class UserCollection(Resource):

@@ -7,8 +7,8 @@ from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import IntegrityError, StatementError
 
-from wordleGame import create_app, db
-from wordleGame.models import DailyWord, Game, Guess, User
+from wordlegame import create_app, db
+from wordlegame.models import DailyWord, Game, Guess, User
 
 """Most of the tests were taken from the course GitHub and slightly modified to fit our purposes"""
 """https://github.com/UniOulu-Ubicomp-Programming-Courses/pwp-sensorhub-example/tree/ex2-project-layout/tests"""
