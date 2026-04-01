@@ -7,7 +7,7 @@ RUN pip install supervisor gunicorn
 WORKDIR /opt/wordleGame
 
 COPY . .
-RUN pip install .
+RUN pip install --no-cache-dir .
 
 COPY supervisor/supervisord.conf /etc/supervisord.conf
 
