@@ -1,8 +1,8 @@
 FROM python:3.13-alpine
 
-RUN pip install supervisor gunicorn
-
 WORKDIR /opt/wordleGame
+
+RUN pip install supervisor gunicorn
 
 COPY . .
 RUN pip install .
