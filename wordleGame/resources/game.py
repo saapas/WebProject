@@ -6,8 +6,8 @@ from werkzeug.exceptions import BadRequest, UnsupportedMediaType, NotFound
 import datetime
 import random
 
-from game import db
-from game.models import Game, User, DailyWord
+from wordleGame import db
+from wordleGame.models import Game, User, DailyWord
 
 
 class GameCollection(Resource):

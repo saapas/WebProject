@@ -4,9 +4,9 @@ from jsonschema import ValidationError, validate
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import BadRequest, UnsupportedMediaType, NotFound
 
-from game import db
-from game.models import Game, Guess
-from game.game_logic import process_guess
+from wordleGame import db
+from wordleGame.models import Game, Guess
+from wordleGame.game_logic import process_guess
 
 
 class GuessCollection(Resource):

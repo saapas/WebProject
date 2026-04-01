@@ -1,7 +1,14 @@
 FROM python:3.13-alpine
-WORKDIR /opt/game
+
+RUN pip install supervisor gunicorn
+
+WORKDIR /opt/wordleGame
+
 COPY . .
 RUN pip install .
-RUN pip install gunicorn supervisor
+
 COPY supervisor/supervisord.conf /etc/supervisord.conf
+
+EXPOSE 8000
+
 CMD ["supervisord", "-n", "-c", "/etc/supervisord.conf"]

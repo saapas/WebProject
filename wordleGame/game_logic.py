@@ -1,6 +1,6 @@
 """Core Wordle guess evaluation and game progression logic."""
 
-from game.models import Guess
+from wordleGame.models import Guess
 
 MAX_ATTEMPTS = 6
 

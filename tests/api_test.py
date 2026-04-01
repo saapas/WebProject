@@ -6,8 +6,8 @@ from flask.testing import FlaskClient
 import pytest
 from werkzeug.datastructures import Headers
 
-from game import create_app, db
-from game.models import User, Game, Guess, DailyWord
+from wordleGame import create_app, db
+from wordleGame.models import User, Game, Guess, DailyWord
 
 TEST_KEY = "verysafetestkey"
 
