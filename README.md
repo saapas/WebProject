@@ -14,6 +14,12 @@ This project is a Flask + Flask-RESTful API for a Wordle-style game.
 - Flask-RESTful
 - SQLite 3
 
+## Required components
+- Docker
+- NGINX
+- Supervisor
+- Gunicorn
+
 ## API documentation
 
 The OpenAPI document is included in the repository at `wordlegame/openapi.yaml`.
@@ -87,6 +93,15 @@ pytest tests/db_test.py --cov=game.models --cov-report=term-missing
 ```bash
 pytest --cov=game --cov-report=term-missing
 ```
+
+## Deployment
+The API is deployed in a Docker environment.
+
+Deployment stack:
+- Docker runs the application in an isolated environment
+- Supervisor monitors and controls the Gunicorn process
+- Gunicorn runs the Flask application with 3 workers on port 8000
+- NGINX works as a reverse proxy and forwards requests to the application server
 
 ## Notes
 - Packaging is configured through `pyproject.toml` and `MANIFEST.in`.
