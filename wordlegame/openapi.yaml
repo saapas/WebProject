@@ -1,0 +1,780 @@
+openapi: 3.0.3
+info:
+  title: Wordle Game API
+  version: 1.0.0
+  description: |
+    REST API for a Wordle-style game.
+servers:
+  - url: http://127.0.0.1:5000
+    description: Local development server
+tags:
+  - name: API Meta
+  - name: Games
+  - name: Guesses
+  - name: Users
+  - name: DailyWords
+
+paths:
+  /api/:
+    get:
+      tags: [API Meta]
+      summary: Get API metadata
+      operationId: getApiEntry
+      responses:
+        '200':
+          description: API metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiEntry'
+              examples:
+                default:
+                  value:
+                    api_version: "1.0"
+                    api_name: wordleApi
+
+  /api/games:
+    get:
+      tags: [Games]
+      summary: List all games
+      operationId: listGames
+      responses:
+        '200':
+          description: List of games
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game'
+              examples:
+                modes:
+                  value:
+                    - id: 1
+                      user_id: 1
+                      mode: day
+                      attempts: 0
+                      won: false
+                    - id: 2
+                      user_id: 1
+                      mode: inf
+                      attempts: 3
+                      won: true
+    post:
+      tags: [Games]
+      summary: Create a game
+      description: |
+        Creates a game for a user.
+
+        - `mode=day` requires a daily word for the current date.
+        - `mode=inf` picks a random word from existing daily words.
+      operationId: createGame
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameCreateRequest'
+            examples:
+              dayMode:
+                value:
+                  user_id: 1
+                  mode: day
+              infMode:
+                value:
+                  user_id: 1
+                  mode: inf
+      responses:
+        '201':
+          description: Game created
+          headers:
+            Location:
+              description: URL of the created game e.g. /api/games/10
+              schema:
+                type: string
+              example: /api/games/10
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Referenced user not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                userNotFound:
+                  value:
+                    message: User not found
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  /api/games/{game_id}:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    get:
+      tags: [Games]
+      summary: Get a game by ID
+      operationId: getGame
+      responses:
+        '200':
+          description: Game details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+              examples:
+                foundGame:
+                  value:
+                    id: 3
+                    user_id: 1
+                    mode: day
+                    attempts: 2
+                    won: false
+        '404':
+          description: Game not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                gameNotFound:
+                  value:
+                    message: Game not found
+    put:
+      tags: [Games]
+      summary: Update a game
+      operationId: updateGame
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameCreateRequest'
+            examples:
+              updateToInf:
+                value:
+                  user_id: 1
+                  mode: inf
+      responses:
+        '204':
+          description: Game updated
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Game not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                gameNotFound:
+                  value:
+                    message: Game not found
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+    delete:
+      tags: [Games]
+      summary: Delete a game
+      operationId: deleteGame
+      responses:
+        '204':
+          description: Game deleted
+        '404':
+          description: Game not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                gameNotFound:
+                  value:
+                    message: Game 99999 not found
+
+  /api/games/{game_id}/guesses:
+    parameters:
+      - $ref: '#/components/parameters/GameId'
+    get:
+      tags: [Guesses]
+      summary: List guesses for a game
+      operationId: listGuesses
+      responses:
+        '200':
+          description: List of guesses for the game
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Guess'
+              examples:
+                validGuesses:
+                  value:
+                    - id: 1
+                      game_id: 3
+                      guessed_word: crane
+                      feedback: GXXYX
+                    - id: 2
+                      game_id: 3
+                      guessed_word: slate
+                      feedback: GGGGG
+                empty:
+                  value: []
+        '404':
+          description: Game not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                gameNotFound:
+                  value:
+                    message: Game not found
+    post:
+      tags: [Guesses]
+      summary: Submit a new guess
+      description: |
+        Validates and evaluates a guess against the game's target word.
+
+        The game attempt counter is increased and `won` is updated when feedback is `GGGGG`.
+      operationId: createGuess
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GuessCreateRequest'
+            examples:
+              validGuess:
+                value:
+                  guessed_word: crane
+      responses:
+        '201':
+          description: Guess accepted and scored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Guess'
+              examples:
+                guessed:
+                  value:
+                    id: 9
+                    game_id: 3
+                    guessed_word: crane
+                    feedback: GXXYX
+        '400':
+          description: Invalid guess or game state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidLength:
+                  value:
+                    message: Word must be 5 letters
+                noAttemptsLeft:
+                  value:
+                    message: No attempts left
+                gameAlreadyWon:
+                  value:
+                    message: Game already won
+                schemaError:
+                  value:
+                    message: "'guessed_word' is a required property"
+        '404':
+          description: Game not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                gameNotFound:
+                  value:
+                    message: Game not found
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  /api/users:
+    get:
+      tags: [Users]
+      summary: List all users
+      operationId: listUsers
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+              examples:
+                users:
+                  value:
+                    - id: 1
+                      created_at: "2026-03-01T12:00:00"
+                      username: aasi
+                    - id: 2
+                      created_at: "2026-03-01T12:05:00"
+                      username: apina
+    post:
+      tags: [Users]
+      summary: Create a user
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+            examples:
+              user:
+                value:
+                  username: petri
+      responses:
+        '201':
+          description: User created
+          headers:
+            Location:
+              description: URL of the created user
+              schema:
+                type: string
+              example: /api/users/7
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  /api/users/{user_id}:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    get:
+      tags: [Users]
+      summary: Get a user by ID
+      operationId: getUser
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                found:
+                  value:
+                    id: 1
+                    created_at: "2026-03-01T12:00:00"
+                    username: aasi
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                userNotFound:
+                  value:
+                    message: User not found
+    put:
+      tags: [Users]
+      summary: Update a user
+      operationId: updateUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+            examples:
+              rename:
+                value:
+                  username: petro
+      responses:
+        '204':
+          description: User updated
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                userNotFound:
+                  value:
+                    message: User not found
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+    delete:
+      tags: [Users]
+      summary: Delete a user
+      operationId: deleteUser
+      responses:
+        '204':
+          description: User deleted
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                userNotFound:
+                  value:
+                    message: User not found
+
+  /api/dailywords:
+    get:
+      tags: [DailyWords]
+      summary: List all daily words
+      operationId: listDailyWords
+      responses:
+        '200':
+          description: List of daily words
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DailyWord'
+              examples:
+                dailyWords:
+                  value:
+                    - date: "2026-03-01"
+                      word: omena
+                    - date: "2026-03-02"
+                      word: crane
+    post:
+      tags: [DailyWords]
+      summary: Create a daily word entry
+      operationId: createDailyWord
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DailyWordCreateRequest'
+            examples:
+              newDailyWord:
+                value:
+                  date: "2026-04-10"
+                  word: kissa
+      responses:
+        '201':
+          description: Daily word created
+          headers:
+            Location:
+              description: URL of the created daily word
+              schema:
+                type: string
+              example: /api/dailywords/2026-04-10
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  /api/dailywords/{date}:
+    parameters:
+      - $ref: '#/components/parameters/Date'
+    get:
+      tags: [DailyWords]
+      summary: Get a daily word by date
+      operationId: getDailyWord
+      responses:
+        '200':
+          description: Daily word details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyWord'
+              examples:
+                foundDate:
+                  value:
+                    date: "2026-03-01"
+                    word: omena
+        '400':
+          description: Invalid date path format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidDate:
+                  value:
+                    message: Invalid date
+        '404':
+          description: Daily word not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                notFound:
+                  value:
+                    message: DailyWord not found
+    put:
+      tags: [DailyWords]
+      summary: Update a daily word by date
+      description: The `date` field in request body must match the URL date.
+      operationId: updateDailyWord
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DailyWordCreateRequest'
+            examples:
+              valid:
+                value:
+                  date: "2026-03-01"
+                  word: kissa
+      responses:
+        '204':
+          description: Daily word updated
+        '400':
+          description: Invalid input or date mismatch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidDate:
+                  value:
+                    message: Invalid date
+                dateMismatch:
+                  value:
+                    message: date in body must match URL
+        '404':
+          description: Daily word not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                notFound:
+                  value:
+                    message: DailyWord not found
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+    delete:
+      tags: [DailyWords]
+      summary: Delete a daily word by date
+      operationId: deleteDailyWord
+      responses:
+        '204':
+          description: Daily word deleted
+        '400':
+          description: Invalid date path format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidDate:
+                  value:
+                    message: Invalid date
+        '404':
+          description: Daily word not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                notFound:
+                  value:
+                    message: DailyWord not found
+
+components:
+  parameters:
+    GameId:
+      name: game_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+      example: 3
+    UserId:
+      name: user_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+      example: 1
+    Date:
+      name: date
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^\\d{4}-\\d{2}-\\d{2}$'
+      example: "2026-03-01"
+
+  responses:
+    BadRequest:
+      description: Invalid request payload
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            invalidSchema:
+              value:
+                message: "Missing required property"
+    UnsupportedMediaType:
+      description: Content type must be application/json
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            wrongContentType:
+              value:
+                message: Did not attempt to load JSON data because the request Content-Type was not 'application/json'.
+
+  schemas:
+    ApiEntry:
+      type: object
+      required: [api_version, api_name]
+      properties:
+        api_version:
+          type: string
+          example: "1.0"
+        api_name:
+          type: string
+          example: wordleApi
+
+    User:
+      type: object
+      required: [id, created_at, username]
+      properties:
+        id:
+          type: integer
+          example: 1
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-03-01T12:00:00"
+        username:
+          type: string
+          maxLength: 10
+          example: aasi
+
+    UserCreateRequest:
+      type: object
+      required: [username]
+      additionalProperties: false
+      properties:
+        username:
+          type: string
+          description: Username for the player
+          example: petri
+
+    Game:
+      type: object
+      required: [id, user_id, mode, attempts, won]
+      properties:
+        id:
+          type: integer
+          example: 3
+        user_id:
+          type: integer
+          example: 1
+        mode:
+          type: string
+          enum: [day, inf]
+          example: day
+        attempts:
+          type: integer
+          minimum: 0
+          maximum: 6
+          example: 2
+        won:
+          type: boolean
+          example: false
+
+    GameCreateRequest:
+      type: object
+      required: [user_id, mode]
+      additionalProperties: false
+      properties:
+        user_id:
+          type: integer
+          minimum: 1
+          example: 1
+        mode:
+          type: string
+          enum: [day, inf]
+          description: day uses the current daily word, inf uses a random daily word
+          example: day
+
+    Guess:
+      type: object
+      required: [id, game_id, guessed_word, feedback]
+      properties:
+        id:
+          type: integer
+          example: 9
+        game_id:
+          type: integer
+          example: 3
+        guessed_word:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: crane
+        feedback:
+          type: string
+          pattern: '^[GXY]{5}$'
+          description: G correct position, Y in word wrong position, X not in word
+          example: GXXYX
+
+    GuessCreateRequest:
+      type: object
+      required: [guessed_word]
+      additionalProperties: false
+      properties:
+        guessed_word:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: crane
+
+    DailyWord:
+      type: object
+      required: [date, word]
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2026-03-01"
+        word:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: omena
+
+    DailyWordCreateRequest:
+      type: object
+      required: [date, word]
+      additionalProperties: false
+      properties:
+        date:
+          type: string
+          format: date
+          pattern: '^\\d{4}-\\d{2}-\\d{2}$'
+          example: "2026-04-10"
+        word:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: kissa
+
+    Error:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          example: User not found

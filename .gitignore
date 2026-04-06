@@ -14,3 +14,13 @@ instance/
 
 .vscode/
 .idea/
+
+# Packaging/build artifacts
+build/
+dist/
+*.egg-info/
+*.eggs/
+
+# Virtual environments
+.venv/
+venv/

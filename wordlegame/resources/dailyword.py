@@ -65,6 +65,8 @@ class DailyWordItem(Resource):
             raise BadRequest(description="Invalid date")
 
         dw = db.session.get(DailyWord, dt)
+        if not dw:
+            raise NotFound(description="DailyWord not found")
 
         try:
             validate(request.json, DailyWord.json_schema())
@@ -91,6 +93,8 @@ class DailyWordItem(Resource):
             raise BadRequest(description="Invalid date")
 
         dw = db.session.get(DailyWord, dt)
+        if not dw:
+            raise NotFound(description="DailyWord not found")
         db.session.delete(dw)
         db.session.commit()
         return Response(status=204)

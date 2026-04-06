@@ -14,6 +14,8 @@ class GuessCollection(Resource):
     def get(self, game_id):
         response_data = []
         game = db.session.get(Game, game_id)
+        if not game:
+            raise NotFound(description="Game not found")
         for guess in game.guesses:
             response_data.append(guess.serialize())
         return response_data
@@ -23,6 +25,8 @@ class GuessCollection(Resource):
             raise UnsupportedMediaType
 
         game = db.session.get(Game, game_id)
+        if not game:
+            raise NotFound(description="Game not found")
 
         try:
             validate(request.json, Guess.json_schema())

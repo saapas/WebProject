@@ -14,27 +14,41 @@ This project is a Flask + Flask-RESTful API for a Wordle-style game.
 - Flask-RESTful
 - SQLite 3
 
-## Install (project root)
-1. Install package and runtime dependencies:
+## API documentation
+
+The OpenAPI document is included in the repository at `wordlegame/openapi.yaml`.
+
+## Installation (inside a Python virtual environment)
+From the project root:
+
+1. Create a virtual environment:
+
+```bash
+python -m venv .venv
+```
+
+2. Activate it:
+
+PowerShell (Windows):
+
+```bash
+.\.venv\Scripts\Activate.ps1
+```
+
+3. Install the project and dependencies:
 
 ```bash
 pip install .
-```
-
-2. Install dependecies:
-
-```bash
-pip install -r requirements.txt
 ```
 
 ## Run the API (development)
 From the project root:
 
 ```bash
-flask --app game:create_app run --debug
+flask --app wordlegame:create_app run --debug
 ```
 
-Default URL:
+Default URLs:
 - API entrypoint: `http://127.0.0.1:5000/api/`
 
 ## Database setup and population
@@ -44,7 +58,7 @@ This API uses SQLite at `instance/wordlegame.db` by default.
 From the project root:
 
 ```bash
-flask --app game:create_app init-db
+flask --app wordlegame:create_app init-db
 ```
 
 ### Populate daily words (required for `mode="day"` game creation)

@@ -1,4 +1,4 @@
 include README.md
 include LICENSE
-recursive-include game .py
+recursive-include wordlegame *.py *.yaml *.html
 global-exclude pycache.py[cod]
