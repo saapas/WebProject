@@ -7,6 +7,8 @@ info:
 servers:
   - url: http://127.0.0.1:5000
     description: Local development server
+  - url: https://navigably-phytosociologic-lorraine.ngrok-free.dev
+    description: NGROK server
 tags:
   - name: API Meta
   - name: Games
@@ -97,14 +99,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '404':
           description: Referenced user not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                userNotFound:
-                  value:
-                    message: User not found
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
 
@@ -132,14 +126,6 @@ paths:
                     won: false
         '404':
           description: Game not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                gameNotFound:
-                  value:
-                    message: Game not found
     put:
       tags: [Games]
       summary: Update a game
@@ -162,14 +148,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '404':
           description: Game not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                gameNotFound:
-                  value:
-                    message: Game not found
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
     delete:
@@ -181,14 +159,6 @@ paths:
           description: Game deleted
         '404':
           description: Game not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                gameNotFound:
-                  value:
-                    message: Game 99999 not found
 
   /api/games/{game_id}/guesses:
     parameters:
@@ -217,18 +187,9 @@ paths:
                       game_id: 3
                       guessed_word: slate
                       feedback: GGGGG
-                empty:
-                  value: []
         '404':
           description: Game not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                gameNotFound:
-                  value:
-                    message: Game not found
+
     post:
       tags: [Guesses]
       summary: Submit a new guess
@@ -282,14 +243,6 @@ paths:
                     message: "'guessed_word' is a required property"
         '404':
           description: Game not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                gameNotFound:
-                  value:
-                    message: Game not found
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
 
@@ -366,14 +319,6 @@ paths:
                     username: aasi
         '404':
           description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                userNotFound:
-                  value:
-                    message: User not found
     put:
       tags: [Users]
       summary: Update a user
@@ -395,14 +340,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '404':
           description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                userNotFound:
-                  value:
-                    message: User not found
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
     delete:
@@ -414,15 +351,7 @@ paths:
           description: User deleted
         '404':
           description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                userNotFound:
-                  value:
-                    message: User not found
-
+  
   /api/dailywords:
     get:
       tags: [DailyWords]
@@ -494,24 +423,9 @@ paths:
                     word: omena
         '400':
           description: Invalid date path format
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                invalidDate:
-                  value:
-                    message: Invalid date
         '404':
           description: Daily word not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                notFound:
-                  value:
-                    message: DailyWord not found
+
     put:
       tags: [DailyWords]
       summary: Update a daily word by date
@@ -533,27 +447,8 @@ paths:
           description: Daily word updated
         '400':
           description: Invalid input or date mismatch
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                invalidDate:
-                  value:
-                    message: Invalid date
-                dateMismatch:
-                  value:
-                    message: date in body must match URL
         '404':
           description: Daily word not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                notFound:
-                  value:
-                    message: DailyWord not found
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
     delete:
@@ -565,24 +460,8 @@ paths:
           description: Daily word deleted
         '400':
           description: Invalid date path format
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                invalidDate:
-                  value:
-                    message: Invalid date
         '404':
           description: Daily word not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                notFound:
-                  value:
-                    message: DailyWord not found
 
 components:
   parameters:
@@ -608,7 +487,7 @@ components:
       required: true
       schema:
         type: string
-        pattern: '^\\d{4}-\\d{2}-\\d{2}$'
+        pattern: '^\d{4}-\d{2}-\d{2}$'
       example: "2026-03-01"
 
   responses:
@@ -763,7 +642,7 @@ components:
         date:
           type: string
           format: date
-          pattern: '^\\d{4}-\\d{2}-\\d{2}$'
+          pattern: '^\d{4}-\d{2}-\d{2}$'
           example: "2026-04-10"
         word:
           type: string
@@ -777,4 +656,3 @@ components:
       properties:
         message:
           type: string
-          example: User not found
