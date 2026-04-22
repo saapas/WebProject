@@ -40,6 +40,10 @@ class UserStats(db.Model):
             "avg_guesses": self.avg_guesses
         }
 
+class ProcessedGame(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    game_id = db.Column(db.Integer, unique=True, nullable=False)
+
 @click.command("init-db")
 @with_appcontext
 def init_db_command():

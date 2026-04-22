@@ -7,7 +7,7 @@ from statservice.models import UserStats
 class UserStatsResource(Resource):
 
     def get(self, user_id):
-        userstats = db.session.get(UserStats, user_id)
+        userstats = UserStats.query.filter_by(wordle_user_id=user_id).first()
         if not userstats:
             raise NotFound(description=f"User not found")
         return userstats.serialize()

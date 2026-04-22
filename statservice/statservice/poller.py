@@ -1,20 +1,14 @@
 import os
 import requests
-from datetime import datetime
 from statservice import db
-from statservice.models import UserStats, Leaderboard
+from statservice.models import UserStats, Leaderboard, ProcessedGame
 
 WORDLE_API_URL = os.getenv('WORDLE_API_URL', 'https://navigably-phytosociologic-lorraine.ngrok-free.dev')
 
-last_game_id = 0
-
 def poll_wordlegame():
-    global last_game_id
-
-    print(f'[poller] polling at {datetime.now()}')
+    print(f'[poller] polling')
 
     try:
-
         response = requests.get(
             f'{WORDLE_API_URL}/api/games',
             timeout=5
@@ -26,21 +20,23 @@ def poll_wordlegame():
         
         games = response.json()
 
-        if not games:
-            print('[poller] no new games to process')
-            return
-        
-        new_games = [g for g in games if g['id'] > last_game_id]
-        
-        if not new_games:
-            print('[poller] no new games')
-            return
+        for game in games:
+            game_id = game['id']
 
-        for game in new_games:
-            process_game(game)
-            last_game_id = max(last_game_id, game['id'])
+            already = ProcessedGame.query.filter_by(game_id=game_id).first()
+            if already:
+                continue
 
-        print(f'[poller] processed {len(new_games)} new games')
+            won = game['won']
+            attempts = game['attempts']
+
+            if won or attempts >= 6:
+                process_game(game)
+
+                db.session.add(ProcessedGame(game_id=game_id))
+                db.session.commit()
+
+        print(f'[poller] processed {len(games)} games')
 
     except requests.exceptions.ConnectionError:
         print('[poller] could not reach wordle API, will retry next interval')
