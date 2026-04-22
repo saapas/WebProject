@@ -12,4 +12,4 @@ RUN pip install --no-cache-dir .
 
 EXPOSE 8001
 
-CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:8001", "statservice:app()"]
+CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:8001", "statservice:create_app()"]
