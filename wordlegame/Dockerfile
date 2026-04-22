@@ -7,7 +7,7 @@ RUN pip install supervisor gunicorn
 WORKDIR /opt/wordlegame
 
 COPY . .
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir setuptools
 
 COPY supervisor/supervisord.conf /etc/supervisord.conf
 
