@@ -2,8 +2,8 @@
 
 from flask import Blueprint
 from flask_restful import Api
-from statservice.resources.leaderboard import Leaderboard
-from statservice.resources.userstats import UserStats
+from statservice.statservice.resources.leaderboard import Leaderboard
+from statservice.statservice.resources.userstats import UserStats
 
 
 from . import views

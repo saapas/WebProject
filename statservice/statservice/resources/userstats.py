@@ -1,8 +1,8 @@
 from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
-from statservice import db
-from statservice.models import UserStats
+from statservice.statservice import db
+from statservice.statservice.models import UserStats
 
 class UserStatsResource(Resource):
 

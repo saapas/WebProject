@@ -3,7 +3,7 @@
 from datetime import datetime, time
 from flask.cli import with_appcontext
 
-from . import db
+from .. import db
 
 class Leaderboard(db.Model):
     """Represents a leaderboard entry"""
