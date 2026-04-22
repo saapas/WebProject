@@ -4,7 +4,7 @@ services:
     expose:
       - "8000"
 
-  stats-service:
+  statservice:
     build: ./stats-service
     expose:
       - "8001"
