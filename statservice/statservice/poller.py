@@ -49,20 +49,18 @@ def poll_wordlegame():
 
 def process_game(game):
     user_id = game['user_id']
-    username = game['username']
     won = game['won']
     guesses = game['guess_count']
 
-    update_user_stats(user_id, username, won, guesses)
-    update_leaderboard(user_id, username, won, guesses)
+    update_user_stats(user_id, won, guesses)
+    update_leaderboard(user_id, won, guesses)
 
-def update_user_stats(user_id, username, won, guesses):
+def update_user_stats(user_id, won, guesses):
     stats = UserStats.query.filter_by(wordle_user_id=user_id).first()
 
     if not stats:
         stats = UserStats(
             wordle_user_id=user_id,
-            username=username
         )
         db.session.add(stats)
 
@@ -76,13 +74,12 @@ def update_user_stats(user_id, username, won, guesses):
 
     db.session.commit()
 
-def update_leaderboard(user_id, username, won, guesses):
+def update_leaderboard(user_id, won, guesses):
     entry = Leaderboard.query.filter_by(wordle_user_id=user_id).first()
 
     if not entry:
         entry = Leaderboard(
             wordle_user_id=user_id,
-            username=username
         )
         db.session.add(entry)
 
