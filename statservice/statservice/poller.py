@@ -62,15 +62,13 @@ def update_user_stats(user_id, won, attempts):
         )
         db.session.add(stats)
 
-    if not won:
-        attempts = 10
-
     stats.total_games = (stats.total_games or 0) + 1
+    effective_attempts = attempts if won else 10
+    stats.avg_guesses = round(
+        (((stats.avg_guesses or 0.0) * (stats.total_wins - 1)) + effective_attempts) / stats.total_wins, 2
+    )
     if won:
         stats.total_wins = (stats.total_wins or 0) + 1
-    stats.avg_guesses = round(
-        (((stats.avg_guesses or 0.0) * (stats.total_wins - 1)) + attempts) / stats.total_wins, 2
-    )
     db.session.commit()
 
 def update_leaderboard(user_id, won, attempts):
