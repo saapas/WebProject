@@ -1,8 +1,8 @@
 import os
 import requests
 from datetime import datetime
-from .. import db
-from .models import UserStats, Leaderboard
+from statservice import db
+from statservice.models import UserStats, Leaderboard
 
 WORDLE_API_URL = os.getenv('WORDLE_API_URL', 'https://navigably-phytosociologic-lorraine.ngrok-free.dev')
 

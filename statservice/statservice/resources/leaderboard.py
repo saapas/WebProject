@@ -1,6 +1,6 @@
 from flask_restful import Resource
 
-from statservice.statservice.models import Leaderboard
+from statservice.models import Leaderboard
 
 class LeaderboardResource(Resource):
 
