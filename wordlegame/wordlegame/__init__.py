@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-def create_app(test_config=None):
+def create_app(test_config=None, *args, **kwargs):
     """Create and configure the Flask application instance."""
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
