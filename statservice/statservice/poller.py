@@ -14,14 +14,9 @@ def poll_wordlegame():
     print(f'[poller] polling at {datetime.now()}')
 
     try:
-        params = {}
-
-        if last_polled:
-            params['completed_after'] = last_polled.isoformat()
 
         response = requests.get(
             f'{WORDLE_API_URL}/api/games',
-            params=params,
             timeout=5
         )
 
