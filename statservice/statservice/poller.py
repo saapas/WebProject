@@ -33,13 +33,13 @@ def poll_wordlegame():
 
         if not games:
             print('[poller] no new games to process')
-            last_polled = datetime.utcnow()
+            last_polled = datetime.now()
             return
         
         for game in games:
             process_game(game)
 
-        last_polled = datetime.utcnow()
+        last_polled = datetime.now()
         print(f'[poller] processed {len(games)} games')
 
     except requests.exceptions.ConnectionError:
