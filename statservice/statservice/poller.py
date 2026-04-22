@@ -51,7 +51,7 @@ def process_game(game):
     update_user_stats(user_id, won, attempts)
     update_leaderboard(user_id, won, attempts)
 
-def update_user_stats(user_id, won, guesses):
+def update_user_stats(user_id, won, attempts):
     stats = UserStats.query.filter_by(wordle_user_id=user_id).first()
     if not stats:
         stats = UserStats(
@@ -62,15 +62,17 @@ def update_user_stats(user_id, won, guesses):
         )
         db.session.add(stats)
 
+    if not won:
+        attempts = 10
+
     stats.total_games = (stats.total_games or 0) + 1
-    if won:
-        stats.total_wins = (stats.total_wins or 0) + 1
-        stats.avg_guesses = round(
-            (((stats.avg_guesses or 0.0) * (stats.total_wins - 1)) + guesses) / stats.total_wins, 2
-        )
+    stats.total_wins = (stats.total_wins or 0) + 1
+    stats.avg_guesses = round(
+        (((stats.avg_guesses or 0.0) * (stats.total_wins - 1)) + attempts) / stats.total_wins, 2
+    )
     db.session.commit()
 
-def update_leaderboard(user_id, won, guesses):
+def update_leaderboard(user_id, won, attempts):
     entry = Leaderboard.query.filter_by(wordle_user_id=user_id).first()
     if not entry:
         entry = Leaderboard(
@@ -79,6 +81,8 @@ def update_leaderboard(user_id, won, guesses):
         )
         db.session.add(entry)
 
-    if won:
-        entry.score = round((entry.score or 0.0) + max(1, 10 - guesses), 2)
+    if not won:
+        attempts = 10
+
+    entry.score = round((entry.score or 0.0) + max(1, 10 - attempts), 2)
     db.session.commit()
