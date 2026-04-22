@@ -29,10 +29,8 @@ def create_app(test_config=None):
     from . import api
     from . import models
 
-    try:
+    with app.app_context():
         db.create_all()
-    except Exception as e:
-        print("DB init skipped:", e)
 
     app.register_blueprint(api.api_bp)
 
