@@ -6,10 +6,10 @@ from statservice.models import UserStats, Leaderboard
 
 WORDLE_API_URL = os.getenv('WORDLE_API_URL', 'https://navigably-phytosociologic-lorraine.ngrok-free.dev')
 
-last_polled = None
+last_game_id = 0
 
 def poll_wordlegame():
-    global last_polled
+    global last_game_id
 
     print(f'[poller] polling at {datetime.now()}')
 
@@ -28,14 +28,19 @@ def poll_wordlegame():
 
         if not games:
             print('[poller] no new games to process')
-            last_polled = datetime.now()
             return
         
-        for game in games:
-            process_game(game)
+        new_games = [g for g in games if g['id'] > last_game_id]
+        
+        if not new_games:
+            print('[poller] no new games')
+            return
 
-        last_polled = datetime.now()
-        print(f'[poller] processed {len(games)} games')
+        for game in new_games:
+            process_game(game)
+            last_game_id = max(last_game_id, game['id'])
+
+        print(f'[poller] processed {len(new_games)} new games')
 
     except requests.exceptions.ConnectionError:
         print('[poller] could not reach wordle API, will retry next interval')
