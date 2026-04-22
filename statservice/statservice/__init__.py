@@ -29,7 +29,7 @@ def create_app(test_config=None):
 
     from . import api
     from . import models
-    from .poller import poll_wordle_api
+    from .poller import poll_wordlegame
 
     with app.app_context():
         db.create_all()
@@ -39,7 +39,7 @@ def create_app(test_config=None):
 
     scheduler = BackgroundScheduler()
     scheduler.add_job(
-        func=lambda: _poll_with_context(app, poll_wordle_api),
+        func=lambda: _poll_with_context(app, poll_wordlegame),
         trigger='interval',
         seconds=60
     )
