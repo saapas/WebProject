@@ -55,36 +55,34 @@ def process_game(game):
     update_user_stats(user_id, won, attempts)
     update_leaderboard(user_id, won, attempts)
 
-def update_user_stats(user_id, won, attempts):
+def update_user_stats(user_id, won, guesses):
     stats = UserStats.query.filter_by(wordle_user_id=user_id).first()
-
     if not stats:
         stats = UserStats(
             wordle_user_id=user_id,
+            total_games=0,
+            total_wins=0,
+            avg_guesses=0.0
         )
         db.session.add(stats)
 
-    stats.total_games += 1
-
+    stats.total_games = (stats.total_games or 0) + 1
     if won:
-        stats.total_wins += 1
+        stats.total_wins = (stats.total_wins or 0) + 1
         stats.avg_guesses = round(
-            ((stats.avg_guesses * (stats.total_wins - 1)) + attempts) / stats.total_wins, 2
+            (((stats.avg_guesses or 0.0) * (stats.total_wins - 1)) + guesses) / stats.total_wins, 2
         )
-
     db.session.commit()
 
-def update_leaderboard(user_id, won, attempts):
+def update_leaderboard(user_id, won, guesses):
     entry = Leaderboard.query.filter_by(wordle_user_id=user_id).first()
-
     if not entry:
         entry = Leaderboard(
             wordle_user_id=user_id,
+            score=0.0
         )
         db.session.add(entry)
 
     if won:
-        # higher score for winning in fewer attempts
-        entry.score = round(entry.score + (10 - attempts), 2)
-
+        entry.score = round((entry.score or 0.0) + max(1, 10 - guesses), 2)
     db.session.commit()
