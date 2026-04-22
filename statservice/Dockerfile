@@ -2,7 +2,7 @@ FROM python:3.13-alpine
 
 ENV HOME=/tmp
 
-WORKDIR /opt/stats-service
+WORKDIR /opt/statservice
 
 COPY . .
 RUN pip install --no-cache-dir setuptools
