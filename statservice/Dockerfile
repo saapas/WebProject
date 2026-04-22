@@ -1,6 +1,7 @@
 FROM python:3.13-alpine
 
 ENV HOME=/tmp
+RUN pip install --no-cache-dir setuptools flask flask-sqlalchemy flask-restful apscheduler requests
 
 WORKDIR /opt/statservice
 
