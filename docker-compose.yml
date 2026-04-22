@@ -1,13 +1,13 @@
 services:
   wordlegame:
     build: ./wordlegame
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
 
-  statservice:
-    build: ./statservice
-    ports:
-      - "8001:8001"
+  stats-service:
+    build: ./stats-service
+    expose:
+      - "8001"
     environment:
       - WORDLE_API_URL=http://wordlegame:8000
     depends_on:
