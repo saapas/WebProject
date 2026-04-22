@@ -66,7 +66,8 @@ def update_user_stats(user_id, won, attempts):
         attempts = 10
 
     stats.total_games = (stats.total_games or 0) + 1
-    stats.total_wins = (stats.total_wins or 0) + 1
+    if won:
+        stats.total_wins = (stats.total_wins or 0) + 1
     stats.avg_guesses = round(
         (((stats.avg_guesses or 0.0) * (stats.total_wins - 1)) + attempts) / stats.total_wins, 2
     )
