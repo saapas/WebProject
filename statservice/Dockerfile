@@ -5,7 +5,7 @@ ENV HOME=/tmp
 WORKDIR /opt/stats-service
 
 COPY . .
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir setuptools
 
 EXPOSE 8001
 
