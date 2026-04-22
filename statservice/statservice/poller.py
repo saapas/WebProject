@@ -50,12 +50,12 @@ def poll_wordlegame():
 def process_game(game):
     user_id = game['user_id']
     won = game['won']
-    guesses = game['guess_count']
+    attempts = game['attempts']
 
-    update_user_stats(user_id, won, guesses)
-    update_leaderboard(user_id, won, guesses)
+    update_user_stats(user_id, won, attempts)
+    update_leaderboard(user_id, won, attempts)
 
-def update_user_stats(user_id, won, guesses):
+def update_user_stats(user_id, won, attempts):
     stats = UserStats.query.filter_by(wordle_user_id=user_id).first()
 
     if not stats:
@@ -69,12 +69,12 @@ def update_user_stats(user_id, won, guesses):
     if won:
         stats.total_wins += 1
         stats.avg_guesses = round(
-            ((stats.avg_guesses * (stats.total_wins - 1)) + guesses) / stats.total_wins, 2
+            ((stats.avg_guesses * (stats.total_wins - 1)) + attempts) / stats.total_wins, 2
         )
 
     db.session.commit()
 
-def update_leaderboard(user_id, won, guesses):
+def update_leaderboard(user_id, won, attempts):
     entry = Leaderboard.query.filter_by(wordle_user_id=user_id).first()
 
     if not entry:
@@ -84,7 +84,7 @@ def update_leaderboard(user_id, won, guesses):
         db.session.add(entry)
 
     if won:
-        # higher score for winning in fewer guesses
-        entry.score = round(entry.score + (10 - guesses), 2)
+        # higher score for winning in fewer attempts
+        entry.score = round(entry.score + (10 - attempts), 2)
 
     db.session.commit()
