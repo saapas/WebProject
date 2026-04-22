@@ -9,4 +9,4 @@ RUN pip install --no-cache-dir setuptools
 
 EXPOSE 8001
 
-CMD ["python", "-m", "flask", "--app", "stats_service", "run", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["python", "-m", "flask", "--app", "statservice", "run", "--host", "0.0.0.0", "--port", "8001"]
