@@ -2,6 +2,7 @@
 
 from datetime import datetime, time
 from flask.cli import with_appcontext
+import click
 
 from . import db
 
@@ -42,3 +43,8 @@ class UserStats(db.Model):
             "total_wins": self.total_wins,
             "avg_guesses": self.avg_guesses
         }
+
+@click.command("init-db")
+@with_appcontext
+def init_db_command():
+    db.create_all()

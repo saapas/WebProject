@@ -31,9 +31,7 @@ def create_app(test_config=None):
     from . import models
     from .poller import poll_wordlegame
 
-    with app.app_context():
-        db.create_all()
-
+    app.cli.add_command(models.init_db_command)
     app.register_blueprint(api.api_bp)
 
     scheduler = BackgroundScheduler()

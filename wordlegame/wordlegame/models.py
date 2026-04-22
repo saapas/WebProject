@@ -1,6 +1,7 @@
 """Database models and schema helpers for the Wordle API."""
 
 from datetime import datetime, time
+import click
 from flask.cli import with_appcontext
 
 from . import db
@@ -164,3 +165,8 @@ class DailyWord(db.Model):
             },
             "additionalProperties": False
         }
+
+@click.command("init-db")
+@with_appcontext
+def init_db_command():
+    db.create_all()
