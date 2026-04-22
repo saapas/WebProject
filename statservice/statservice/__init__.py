@@ -40,7 +40,7 @@ def create_app(test_config=None):
         scheduler.add_job(
             func=lambda: _poll_with_context(app, poll_wordlegame),
             trigger='interval',
-            seconds=60,
+            seconds=10,
             next_run_time=datetime.now()
         )
         scheduler.start()

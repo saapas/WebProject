@@ -20,7 +20,7 @@ def poll_wordlegame():
             params['completed_after'] = last_polled.isoformat()
 
         response = requests.get(
-            f'{WORDLE_API_URL}/games',
+            f'{WORDLE_API_URL}/api/games',
             params=params,
             timeout=5
         )
