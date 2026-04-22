@@ -32,7 +32,6 @@ def create_app(test_config=None):
     with app.app_context():
         db.create_all()
 
-    app.cli.add_command(models.init_db_command)
     app.register_blueprint(api.api_bp)
 
     return app
