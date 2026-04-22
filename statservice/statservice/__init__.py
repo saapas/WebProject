@@ -1,6 +1,8 @@
 """Flask application factory and shared SQLAlchemy instance."""
 
 import os
+import atexit
+from datetime import datetime
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -19,7 +21,6 @@ def create_app(test_config=None):
         app.config.from_pyfile("config.py", silent=True)
     else:
         app.config.from_mapping(test_config)
-
     try:
         os.makedirs(app.instance_path)
     except OSError:
@@ -34,17 +35,20 @@ def create_app(test_config=None):
     app.cli.add_command(models.init_db_command)
     app.register_blueprint(api.api_bp)
 
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(
-        func=lambda: _poll_with_context(app, poll_wordlegame),
-        trigger='interval',
-        seconds=60
-    )
-    scheduler.start()
+    if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(
+            func=lambda: _poll_with_context(app, poll_wordlegame),
+            trigger='interval',
+            seconds=60,
+            next_run_time=datetime.now()
+        )
+        scheduler.start()
+        atexit.register(lambda: scheduler.shutdown())
 
     return app
 
 def _poll_with_context(app, poll_fn):
-    """Run the poller inside the app context so db is accessible."""
-    with app.app_context():
-        poll_fn()
+        """Run the poller inside the app context so db is accessible."""
+        with app.app_context():
+            poll_fn()
