@@ -2,12 +2,12 @@ FROM python:3.13-alpine
 
 ENV HOME=/tmp
 
-RUN pip install supervisor gunicorn
+RUN pip install supervisor gunicorn setuptools
 
 WORKDIR /opt/wordlegame
 
 COPY . .
-RUN pip install --no-cache-dir setuptools
+RUN pip install --no-cache-dir .
 
 COPY supervisor/supervisord.conf /etc/supervisord.conf
 
