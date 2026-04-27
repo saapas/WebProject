@@ -6,6 +6,7 @@ from statservice.models import UserStats, Leaderboard, ProcessedGame
 WORDLE_API_URL = os.getenv('WORDLE_API_URL', 'https://navigably-phytosociologic-lorraine.ngrok-free.dev')
 
 def poll_wordlegame():
+    """Poll Wordle API games and process newly finished entries."""
     print(f'[poller] polling')
 
     try:
@@ -17,7 +18,7 @@ def poll_wordlegame():
         if response.status_code != 200:
             print(f'[poller] API returned {response.status_code}, skipping')
             return
-        
+
         games = response.json()
 
         for game in games:
@@ -44,6 +45,7 @@ def poll_wordlegame():
         print(f'[poller] unexpected error: {e}')
 
 def process_game(game):
+    """Apply stats and leaderboard updates for a completed game."""
     user_id = game['user_id']
     won = game['won']
     attempts = game['attempts']
@@ -52,6 +54,7 @@ def process_game(game):
     update_leaderboard(user_id, won, attempts)
 
 def update_user_stats(user_id, won, attempts):
+    """Create or update aggregate stats for one user."""
     stats = UserStats.query.filter_by(wordle_user_id=user_id).first()
     if not stats:
         stats = UserStats(
@@ -65,7 +68,7 @@ def update_user_stats(user_id, won, attempts):
     prev_games = stats.total_games
     stats.total_games = (stats.total_games or 0) + 1
     effective_attempts = attempts if won else 10
-    
+
     if won:
         stats.total_wins = (stats.total_wins or 0) + 1
     stats.avg_guesses = round(
@@ -75,6 +78,7 @@ def update_user_stats(user_id, won, attempts):
     db.session.commit()
 
 def update_leaderboard(user_id, won, attempts):
+    """Create or update leaderboard score for one user."""
     entry = Leaderboard.query.filter_by(wordle_user_id=user_id).first()
     if not entry:
         entry = Leaderboard(

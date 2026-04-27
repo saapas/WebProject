@@ -51,7 +51,7 @@ pip install .
 From the project root:
 
 ```bash
-flask --app wordlegame:create_app run --debug
+flask --app wordlegame.wordlegame:create_app run --debug
 ```
 
 Default URLs:
@@ -64,8 +64,85 @@ This API uses SQLite at `instance/wordlegame.db` by default.
 From the project root:
 
 ```bash
-flask --app wordlegame:create_app init-db
+flask --app wordlegame.wordlegame:create_app init-db
 ```
+
+## Discord Client (Bot)
+The repository includes a Discord bot client at `discord-bot/bot.py`.
+
+### What the client does
+- Registers a Discord user to an API user
+- Creates and plays Wordle games through slash commands
+- Restricts users to their own active game
+- Shows formatted guess feedback and guess history
+- Shows leaderboard and per-user stats from the stats service
+
+### Prerequisites
+- Python virtual environment activated
+- Discord bot application and token from Discord Developer Portal
+- Bot invited to your server with these scopes:
+	- `bot`
+	- `applications.commands`
+
+### Install client dependencies
+From the project root:
+
+```bash
+pip install discord.py aiohttp
+```
+
+### Run required backend services
+You need the game API and stats service running before starting the bot.
+
+1. Run game API (terminal 1):
+
+```bash
+flask --app wordlegame.wordlegame:create_app init-db
+flask --app wordlegame.wordlegame:create_app run --debug
+```
+
+2. Run stats service (terminal 2):
+
+```bash
+set WORDLE_API_URL=http://127.0.0.1:5000
+flask --app statservice.statservice:create_app init-db
+flask --app statservice.statservice:create_app run --debug --port 5001
+```
+
+PowerShell version for setting the URL:
+
+```powershell
+$env:WORDLE_API_URL="http://127.0.0.1:5000"
+```
+
+### Configure and run the bot
+Run in a separate terminal (project root):
+
+PowerShell:
+
+```powershell
+$env:DISCORD_TOKEN="YOUR_BOT_TOKEN"
+$env:WORDLE_API_BASE_URL="http://127.0.0.1:5000"
+$env:STAT_API_BASE_URL="http://127.0.0.1:5001"
+python .\discord-bot\bot.py
+```
+
+### Slash commands
+- `/register username:<name>`
+	- Registers your Discord account once and maps it to one API user.
+- `/newgame mode:day|inf`
+	- Starts a new game.
+	- User can only have one active game at a time.
+	- Daily mode can only be played once per API user.
+- `/guess word:<five-letter-word>`
+	- Submits guess to your active game automatically.
+	- Shows all guesses in order with emoji feedback.
+- `/leaderboard`
+	- Shows top players from stats service.
+- `/stats`
+	- Shows your stats.
+- `/stats member:@User`
+	- Shows another registered member's stats.
 
 ### Populate daily words (required for `mode="day"` game creation)
 You can add daily words via API:

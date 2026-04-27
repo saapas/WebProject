@@ -15,12 +15,12 @@ instance/
 .vscode/
 .idea/
 
-# Packaging/build artifacts
 build/
 dist/
 *.egg-info/
 *.eggs/
 
-# Virtual environments
 .venv/
 venv/
+
+discord-bot/user_map.json

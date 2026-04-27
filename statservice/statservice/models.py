@@ -1,6 +1,5 @@
 """Database models and schema helpers for the stats-service Auxiliary service for the Wordle API."""
 
-from datetime import datetime, time
 from flask.cli import with_appcontext
 import click
 

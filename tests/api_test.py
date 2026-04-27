@@ -7,7 +7,7 @@ import pytest
 from werkzeug.datastructures import Headers
 
 from wordlegame import create_app, db
-from wordlegame.models import User, Game, Guess, DailyWord
+from wordlegame.wordlegame.models import User, Game, Guess, DailyWord
 
 TEST_KEY = "verysafetestkey"
 
