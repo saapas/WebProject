@@ -25,27 +25,27 @@ Adding gitignore and no UserStats
 
 
 ## Meeting 3.
-* **DATE:**
-* **PARTICIPANTS:**
-* **TEACHER:**
+* **DATE: 10.3.2026**
+* **PARTICIPANTS: Samuel Palovaara, Toni Makkonen, Eeli Tavaststjerna**
+* **TEACHER: Mika Oja**
 
 ### Action points
-*List here the actions points discussed with assistants*
+Better documentation on the resources. Making actual user-ids instead of table keys.
 
 ### Notes
 *Add here notes that you consider important. This is not mandatory*
 
 
 ## Meeting 4.
-* **DATE:**
-* **PARTICIPANTS:**
-* **TEACHER:**
+* **DATE: 13.4.2026**
+* **PARTICIPANTS: Samuel Palovaara, Toni Makkonen, Eeli Tavaststjerna**
+* **TEACHER: Mika Oja**
 
 ### Action points
-*List here the actions points discussed with assistants*
+None.
 
 ### Notes
-*Add here notes that you consider important. This is not mandatory*
+Using the provided vm from uni could have been easier and better in real deployment.
 
 
 ## Midterm meeting
