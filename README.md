@@ -64,6 +64,7 @@ From the project root:
 
 ```bash
 flask --app wordlegame.wordlegame:create_app init-db
+flask --app statservice.statservice:create_app init-db
 ```
 
 ## Discord Client (Bot)
@@ -175,11 +176,8 @@ The API is deployed in a Docker environment.
 
 Deployment stack:
 - Docker runs the application in an isolated environment
-- Supervisor monitors and controls the Gunicorn process
 - Gunicorn runs the Flask application with 3 workers on port 8000
 - NGINX works as a reverse proxy and forwards requests to the application server
 
 ## Notes
 - Packaging is configured through `pyproject.toml` and `MANIFEST.in`.
-- This repository currently contains the API service only.
-- Client and auxiliary services are not included in this codebase.
