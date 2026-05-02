@@ -17,7 +17,6 @@ This project is a Flask + Flask-RESTful API for a Wordle-style game.
 ## Required components
 - Docker
 - NGINX
-- Supervisor
 - Gunicorn
 
 ## API documentation
