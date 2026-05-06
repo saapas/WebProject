@@ -12,7 +12,6 @@ services:
       - WORDLE_API_URL=http://wordlegame:8000
     depends_on:
       - wordlegame
-    restart: always
 
   nginx:
     image: nginx:alpine
